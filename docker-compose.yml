@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  scraping-service:
+    build: ./web-scraping-hltv
+    container_name: scraping-service
+
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - furia-network
+
+  intent-service:
+    build: ./furia-intent-service
+    container_name: intent-service
+ 
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - furia-network
+
+  backend:
+    build: ./furia-chat-bot-backend
+    container_name: backend
+    ports:
+      - "8002:8002" 
+    depends_on:
+      - scraping-service
+      - intent-service
+    restart: unless-stopped
+    networks:
+      - furia-network
+
+  frontend:
+    build:
+      context: ./furia-chatbot-front
+    container_name: frontend
+    ports:
+      - "8003:8003" 
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - furia-network
+
+networks:
+  furia-network:
+    driver: bridge
+
